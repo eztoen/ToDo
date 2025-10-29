@@ -1,0 +1,18 @@
+{
+  "workbench.colorCustomizations": {
+    "sideBar.background": "#202020",
+    "sideBar.foreground": "#c9c9c9",
+    "activityBar.background": "#202020",
+    "editor.background": "#202020",
+    "titleBar.activeBackground": "#202020",
+    "titleBar.inactiveBackground": "#202020",
+    "statusBar.background": "#202020",
+    "statusBar.noFolderBackground": "#202020",
+    "editorGutter.background": "#202020",
+    "tab.activeBackground": "#383838",
+    "tab.inactiveBackground": "#222222"
+  },
+  "python.REPL.enableREPLSmartSend": false,
+  "python-envs.defaultEnvManager": "ms-python.python:system",
+  "python-envs.pythonProjects": []
+}
