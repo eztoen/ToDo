@@ -1,16 +1,22 @@
-from sqlalchemy import Column, String, Boolean, Date, Enum
+from sqlalchemy import (
+    Column, 
+    String, 
+    Boolean, 
+    Date, 
+    Enum as SQLEnum
+)
 
-import enum
+from enum import Enum
 
 from .base import Base
 
-class TaskStatus(enum.Enum):
+class TaskStatus(str, Enum):
     CURRENT = 'current'
-    EXPIRED = 'expire'
+    EXPIRE = 'expire'
     TODAY = 'today'
     DONE = 'done'
 
 class Tasks(Base):
     title = Column(String, nullable=False)
     date = Column(Date, nullable=False)
-    status = Column(Enum(TaskStatus))
+    status = Column(SQLEnum(TaskStatus), default=TaskStatus.CURRENT)

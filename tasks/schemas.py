@@ -4,10 +4,10 @@ from enum import Enum
 
 
 class TaskStatus(str, Enum):
-    CURRENT = 'current'
-    EXPIRED = 'expire'
-    TODAY = 'today'
-    DONE = 'done'
+    current = 'current'
+    expire = 'expire'
+    today = 'today'
+    done = 'done'
     
 class TaskBase(BaseModel):
     title: str = Field(max_length=255)

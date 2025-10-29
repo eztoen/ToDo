@@ -11,15 +11,15 @@ async def get_tasks(session: AsyncSession) -> list[Tasks]:
     tasks = result.scalars().all()
     return list(tasks)
 
-async def get_task_by_date(session: AsyncSession, date) -> Tasks | None:
+async def get_task_by_date(session: AsyncSession, date: str) -> Tasks | None:
     return await session.get(Tasks, date)
 
 async def create_task(session: AsyncSession, new_task: TaskCreate):
-    product = Tasks(**new_task.model_dump())
-    session.add(product)
+    task = Tasks(**new_task.model_dump())
+    session.add(task)
     await session.commit()
-    await session.refresh(product)
-    return product
+    await session.refresh(task)
+    return task
 
 async def update_task_status(session: AsyncSession, task_id):
     ...
