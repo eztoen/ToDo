@@ -5,7 +5,7 @@ from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models import Tasks
-from .schemas import TaskCreate
+from .schemas import TaskCreate, TaskStatus
 
 async def get_tasks(session: AsyncSession) -> list[Tasks]:
     stmt = select(Tasks).order_by(Tasks.date)
@@ -40,8 +40,27 @@ async def create_task(session: AsyncSession, new_task: TaskCreate):
     await session.refresh(task)
     return task
 
-async def update_task_status(session: AsyncSession, task_id, new_status):
-    ...
+async def update_task_status(session: AsyncSession, task_id: int, new_status: TaskStatus):
+    select_stmt = select(Tasks).where(Tasks.id == task_id)
+    result: Result = await session.execute(select_stmt)
+    task = result.scalars().all()
+    
+    if not task:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Task not found'
+    )
+        
+    update_stmt = (
+        update(Tasks)
+        .where(Tasks.id == task_id)
+        .values(status=new_status)
+    )
+    
+    result: Result = await session.execute(update_stmt)
+    await session.commit()
+    
+    return {'success': True, 'message': 'Status changed'}
     
 async def update_task_date(session: AsyncSession, task_id: int, new_task_date: date):
     select_stmt = select(Tasks).where(Tasks.id == task_id)

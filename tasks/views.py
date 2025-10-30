@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.models import db_helper
 from . import crud
-from .schemas import Task, TaskCreate
+from .schemas import Task, TaskCreate, TaskStatus
 
 router = APIRouter(prefix='/tasks', tags=['Tasks'])
 
@@ -20,7 +20,11 @@ async def get_tasks_by_date(date: date, session: AsyncSession = Depends(db_helpe
 async def create_task(new_task: TaskCreate, session: AsyncSession = Depends(db_helper.get_scoped_session)):
     return await crud.create_task(session=session, new_task=new_task)
 
-@router.patch('/')
+@router.patch('/status/{task_id}')
+async def update_status(task_id: int, task_status: TaskStatus, session: AsyncSession = Depends(db_helper.get_scoped_session)):
+    return await crud.update_task_status(session=session, task_id=task_id, new_status=task_status)
+
+@router.patch('/deadline/{task_id}')
 async def update_date(task_id: int, task_date: date, session: AsyncSession = Depends(db_helper.get_scoped_session)):
     return await crud.update_task_date(session=session, task_id=task_id, new_task_date=task_date)
 
