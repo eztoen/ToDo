@@ -31,3 +31,7 @@ async def get_tasks_by_date(date: date, session: AsyncSession = Depends(db_helpe
 @router.post('/', response_model=Task)
 async def create_task(new_task: TaskCreate, session: AsyncSession = Depends(db_helper.get_scoped_session)):
     return await crud.create_task(session=session, new_task=new_task)
+
+@router.delete('/')
+async def delete_task(task_id: int, session: AsyncSession = Depends(db_helper.get_scoped_session)):
+    return await crud.delete_task(session=session, task_id=task_id)

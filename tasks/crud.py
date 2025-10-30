@@ -1,5 +1,5 @@
 from datetime import date
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,4 +32,7 @@ async def update_task_status(session: AsyncSession, task_id):
     ...
     
 async def delete_task(session: AsyncSession, task_id):
-    ...
+    stmt = delete(Tasks).where(Tasks.id == task_id)
+    result: Result = await session.execute(stmt)
+    await session.commit()
+    return result.rowcount
