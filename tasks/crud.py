@@ -1,3 +1,4 @@
+from datetime import date
 from sqlalchemy import select
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,8 +12,11 @@ async def get_tasks(session: AsyncSession) -> list[Tasks]:
     tasks = result.scalars().all()
     return list(tasks)
 
-async def get_task_by_date(session: AsyncSession, date: str) -> Tasks | None:
-    return await session.get(Tasks, date)
+async def get_task_by_date(session: AsyncSession, date: date) -> list[Tasks]:
+    stmt = select(Tasks).where(Tasks.date == date)
+    result: Result = await session.execute(stmt)
+    tasks = result.scalars().all()
+    return list(tasks)
 
 async def create_task(session: AsyncSession, new_task: TaskCreate):
     task = Tasks(**new_task.model_dump())

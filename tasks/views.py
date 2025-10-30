@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,7 +19,7 @@ async def get_tasks(session: AsyncSession = Depends(db_helper.get_scoped_session
     return tasks
         
 @router.get('/{date}', response_model=list[Task])
-async def get_tasks_by_date(date: str, session: AsyncSession = Depends(db_helper.get_scoped_session)):
+async def get_tasks_by_date(date: date, session: AsyncSession = Depends(db_helper.get_scoped_session)):
     tasks = await crud.get_task_by_date(session=session, date=date)
     if not tasks:
         raise HTTPException(
