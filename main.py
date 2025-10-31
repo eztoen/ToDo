@@ -9,12 +9,12 @@ import uvicorn
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with db_helper.async_engine.begin() as conn:
-        try:
-            await conn.run_sync(Base.metadata.create_all)
-        finally:
-            await conn.close()
-    yield
-
+        await conn.run_sync(Base.metadata.create_all)
+    
+        yield
+        
+        await conn.close()
+        
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(task_router)
