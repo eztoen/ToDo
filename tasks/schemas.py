@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 from datetime import date
 from enum import Enum
 
-
 class TaskStatus(str, Enum):
     current = 'current'
     expire = 'expire'
