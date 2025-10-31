@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from core.models import Base, db_helper
+from core.models import Base, db_helper, redis_helper
 from tasks.views import router as task_router
 
 from contextlib import asynccontextmanager
@@ -11,9 +11,12 @@ async def lifespan(app: FastAPI):
     async with db_helper.async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     
-        yield
-        
-        await conn.close()
+    app.state.redis = await redis_helper.get_client()
+    
+    yield
+    
+    await redis_helper.close()
+    await conn.close()
         
 app = FastAPI(lifespan=lifespan)
 

@@ -15,3 +15,5 @@ class RedisHelper:
     
     async def close(self):
         await self.redis.close
+        
+redis_helper = RedisHelper()
