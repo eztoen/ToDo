@@ -6,7 +6,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.models import Tasks, redis_helper
+from core.models import Tasks, redis_helper, clear_task_cache
 from .schemas import TaskCreate, TaskStatus, TaskRead
 
 async def get_tasks(session: AsyncSession) -> list[Tasks]:
@@ -56,40 +56,49 @@ async def create_task(session: AsyncSession, new_task: TaskCreate):
     session.add(task)
     await session.commit()
     await session.refresh(task)
+    
+    clear_task_cache(new_task.date)
+    
     return task
 
 async def update_task_status(session: AsyncSession, task_id: int, new_status: TaskStatus):
     select_stmt = select(Tasks).where(Tasks.id == task_id)
     result: Result = await session.execute(select_stmt)
-    task = result.scalars().all()
+    task = result.scalars().first()
     
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Task not found'
     )
-        
+    
+    task_date = task.date
+    
     update_stmt = (
         update(Tasks)
         .where(Tasks.id == task_id)
         .values(status=new_status)
     )
     
-    result: Result = await session.execute(update_stmt)
+    await session.execute(update_stmt)
     await session.commit()
+    
+    await clear_task_cache(task_date)
     
     return {'success': True, 'message': 'Status changed'}
     
 async def update_task_date(session: AsyncSession, task_id: int, new_task_date: date):
     select_stmt = select(Tasks).where(Tasks.id == task_id)
     result: Result = await session.execute(select_stmt)
-    task = result.scalars().all()
+    task = result.scalars().first()
     
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Task not found'
     )
+    
+    old_date = task.date
     
     update_stmt = (
         update(Tasks)
@@ -97,8 +106,11 @@ async def update_task_date(session: AsyncSession, task_id: int, new_task_date: d
         .values(date=new_task_date)
     )
     
-    result: Result = await session.execute(update_stmt)
+    await session.execute(update_stmt)
     await session.commit()
+    
+    await clear_task_cache(old_date)
+    await clear_task_cache(new_task_date)
     
     return {'success': True, 'message': 'Date changed'}
         
