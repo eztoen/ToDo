@@ -9,12 +9,12 @@ from core.models import rate_limiter, get_db
 router = APIRouter(prefix='/tasks', tags=['Tasks'])
 
 @router.get('/', response_model=list[TaskRead])
-@rate_limiter(limit=100, period=3600)
+@rate_limiter(limit=35, period=300)
 async def get_tasks(request: Request, session: AsyncSession = Depends(get_db)):
     return await crud.get_tasks(session=session)
         
 @router.get('/{date}', response_model=list[TaskRead])
-@rate_limiter(limit=80, period=3600)
+@rate_limiter(limit=25, period=300)
 async def get_tasks_by_date(request: Request, date: date, session: AsyncSession = Depends(get_db)):
     return await crud.get_task_by_date(session=session, date=date)
 
@@ -24,12 +24,12 @@ async def create_task(request: Request, new_task: TaskCreate, session: AsyncSess
     return await crud.create_task(session=session, new_task=new_task)
 
 @router.patch('/status/{task_id}')
-@rate_limiter(limit=40, period=300)
+@rate_limiter(limit=50, period=600)
 async def update_status(request: Request, task_id: int, task_status: TaskStatus, session: AsyncSession = Depends(get_db)):
     return await crud.update_task_status(session=session, task_id=task_id, new_status=task_status)
 
 @router.patch('/deadline/{task_id}')
-@rate_limiter(limit=40, period=300)
+@rate_limiter(limit=50, period=600)
 async def update_date(request: Request, task_id: int, task_date: date, session: AsyncSession = Depends(get_db)):
     return await crud.update_task_date(session=session, task_id=task_id, new_task_date=task_date)
 
