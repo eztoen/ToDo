@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import date
 from enum import Enum
 
@@ -16,7 +16,10 @@ class TaskBase(BaseModel):
 class TaskCreate(TaskBase):
     pass
 
-class Task(TaskBase):
+class TaskRead(BaseModel):
     id: int
-    class Congif:
-        orm_mode = True
+    title: str
+    date: date
+    status: TaskStatus 
+    
+    model_config = ConfigDict(from_attributes=True)

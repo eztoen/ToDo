@@ -1,11 +1,13 @@
+import json
 from fastapi import HTTPException, status
 from datetime import date
+from redis import Redis
 from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.models import Tasks
-from .schemas import TaskCreate, TaskStatus
+from core.models import Tasks, redis_helper
+from .schemas import TaskCreate, TaskStatus, TaskRead
 
 async def get_tasks(session: AsyncSession) -> list[Tasks]:
     stmt = select(Tasks).order_by(Tasks.date)
@@ -21,6 +23,14 @@ async def get_tasks(session: AsyncSession) -> list[Tasks]:
     return list(tasks)
 
 async def get_task_by_date(session: AsyncSession, date: date) -> list[Tasks]:
+    redis: Redis = await redis_helper.get_client()
+    cache_key = f'tasks:{date.isoformat()}'
+    
+    cached = await redis.get(cache_key)
+    
+    if cached:
+        return [TaskRead(**task_data) for task_data in json.loads(cached)]
+    
     stmt = select(Tasks).where(Tasks.date == date)
     result: Result = await session.execute(stmt)
     tasks = result.scalars().all()
@@ -31,7 +41,15 @@ async def get_task_by_date(session: AsyncSession, date: date) -> list[Tasks]:
             detail='You dont have any tasks for this day yet'
     )
     
-    return list(tasks)
+    task_read_models = [TaskRead.model_validate(t).model_dump(mode='json') for t in tasks]
+    
+    await redis.set(
+        cache_key, 
+        json.dumps(task_read_models), 
+        ex=3600
+    )
+    
+    return [TaskRead.model_validate(t) for t in tasks]
 
 async def create_task(session: AsyncSession, new_task: TaskCreate):
     task = Tasks(**new_task.model_dump())
