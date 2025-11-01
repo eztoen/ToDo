@@ -16,7 +16,7 @@ async def lifespan(app: FastAPI):
     yield
     
     await redis_helper.close()
-    await conn.close()
+    await db_helper.async_engine.dispose()
         
 app = FastAPI(lifespan=lifespan)
 

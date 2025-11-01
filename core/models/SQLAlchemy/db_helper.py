@@ -32,3 +32,5 @@ class DatabaseHelper:
 db_helper = DatabaseHelper(
     url=settings.DATABASE_URL_asyncpg,
 )
+
+get_db = db_helper.get_scoped_session

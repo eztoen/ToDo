@@ -2,6 +2,7 @@ __all__ = (
     "Base",
     "DatabaseHelper",
     "db_helper",
+    'get_db'
     "Tasks",
     'RedisHelper',
     'redis_helper',
@@ -10,7 +11,7 @@ __all__ = (
 )
 
 from .SQLAlchemy.base import Base
-from .SQLAlchemy.db_helper import DatabaseHelper, db_helper
+from .SQLAlchemy.db_helper import DatabaseHelper, db_helper, get_db
 from .SQLAlchemy.tasks import Tasks
 
 from .Redis.redis_helper import RedisHelper, redis_helper
