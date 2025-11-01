@@ -1,7 +1,6 @@
 from sqlalchemy import (
     Column, 
     String, 
-    Boolean, 
     Date, 
     Enum as SQLEnum
 )
