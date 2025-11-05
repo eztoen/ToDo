@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
 import re
 
 class UserCreate(BaseModel):
@@ -19,3 +19,10 @@ class UserCreate(BaseModel):
         if " " in value:
             raise ValueError("Password cannot contain spaces.")
         return value
+    
+class UserRead(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    
+    model_config = ConfigDict(from_attributes=True)
