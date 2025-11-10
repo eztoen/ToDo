@@ -29,3 +29,5 @@ class Security(BaseSettings):
         )
         
     model_config = SettingsConfigDict(env_file='.env')
+    
+security = Security()
