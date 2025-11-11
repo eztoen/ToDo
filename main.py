@@ -1,10 +1,10 @@
+import uvicorn
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
 from core.models import Base, db_helper, redis_helper
 from tasks.views import router as task_router
-
-from contextlib import asynccontextmanager
-import uvicorn
+from auth.views import router as auth_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +21,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(task_router)
+app.include_router(auth_router)
 
 if __name__ == '__main__':
     uvicorn.run('main:app', reload=True)
