@@ -1,9 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from datetime import datetime, timedelta, timezone
-from jose import jwt, JWTError
+from jose import jwt
 from passlib.context import CryptContext
 from typing import Optional
-from .config import settings
 
 pwd_context = CryptContext(schemes=['argon2'], deprecated='auto')
 
