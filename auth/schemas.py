@@ -31,6 +31,8 @@ class UserRead(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
     
-class Token(BaseModel):
+class TokenResponse(BaseModel):
+    success: bool
+    message: str
     access_token: str
     token_type: str

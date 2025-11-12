@@ -5,7 +5,7 @@ from sqlalchemy.engine import Result
 
 from core.security import security
 from core.models import Users
-from .schemas import UserRegister, UserLogin
+from .schemas import UserRegister, UserLogin, TokenResponse
 
 async def register_user(new_user: UserRegister, session: AsyncSession):
     stmt = select(Users).where(Users.email == new_user.email)
@@ -28,12 +28,13 @@ async def register_user(new_user: UserRegister, session: AsyncSession):
     await session.refresh(user)
     
     token = security.create_access_token({'sub': str(user.id)})
-    return {
-        'success': True,
-        'message': 'You have successfully registered',
-        'access_token': token, 
-        'token_type': 'bearer',
-    }
+    
+    return TokenResponse(
+        success=True,
+        message='You have successfully registered',
+        access_token=token,
+        token_type='bearer',
+    )
 
 async def login_user(user_data: UserLogin, session: AsyncSession):
     stmt = select(Users).where(Users.email == user_data.email)
@@ -47,9 +48,10 @@ async def login_user(user_data: UserLogin, session: AsyncSession):
         )
         
     token = security.create_access_token({'sub': str(user.id)})
-    return {
-        'success': True,
-        'message': 'You have successfully logged into your account',
-        'access_token': token, 
-        'token_type': 'bearer', 
-    }
+    
+    return TokenResponse(
+        success=True,
+        message='You have successfully logged into your account',
+        access_token=token,
+        token_type='bearer',
+    )
