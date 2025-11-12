@@ -5,9 +5,9 @@ from sqlalchemy.engine import Result
 
 from core.security import security
 from core.models import Users
-from .schemas import UserCreate
+from .schemas import UserRegister, UserLogin
 
-async def register(new_user: UserCreate, session: AsyncSession):
+async def register_user(new_user: UserRegister, session: AsyncSession):
     stmt = select(Users).where(Users.email == new_user.email)
     result: Result = await session.execute(stmt)
     user = result.scalars().first()
@@ -28,4 +28,28 @@ async def register(new_user: UserCreate, session: AsyncSession):
     await session.refresh(user)
     
     token = security.create_access_token({'sub': str(user.id)})
-    return {'access_token': token, 'token_type': 'bearer'}
+    return {
+        'success': True,
+        'message': 'You have successfully registered',
+        'access_token': token, 
+        'token_type': 'bearer',
+    }
+
+async def login_user(user_data: UserLogin, session: AsyncSession):
+    stmt = select(Users).where(Users.email == user_data.email)
+    result: Result = await session.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user or not security.verify_password(user_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid credentials. Please try again'
+        )
+        
+    token = security.create_access_token({'sub': str(user.id)})
+    return {
+        'success': True,
+        'message': 'You have successfully logged into your account',
+        'access_token': token, 
+        'token_type': 'bearer', 
+    }

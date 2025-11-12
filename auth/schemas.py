@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
 import re
 
-class UserCreate(BaseModel):
+class UserRegister(BaseModel):
     username: str = Field(..., min_length=5, max_length=35, pattern=r'^[a-zA-Z0-9_]+$')
     email: EmailStr = Field(..., min_length=5, max_length=256)
     password: str = Field(..., min_length=8, max_length=128)
@@ -19,6 +19,10 @@ class UserCreate(BaseModel):
         if " " in value:
             raise ValueError("Password cannot contain spaces.")
         return value
+    
+class UserLogin(BaseModel):
+    email: EmailStr = Field(..., min_length=5, max_length=256)
+    password: str = Field(..., min_length=8, max_length=128)
     
 class UserRead(BaseModel):
     id: int
