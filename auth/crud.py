@@ -1,9 +1,9 @@
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.engine import Result
 
-from core.security import security
+from core.security import security, oauth2_scheme
 from core.models import Users
 from .schemas import UserRegister, UserLogin, TokenResponse
 
@@ -27,14 +27,15 @@ async def register_user(new_user: UserRegister, session: AsyncSession):
     await session.commit()
     await session.refresh(user)
     
-    token = security.create_access_token({'sub': str(user.id)})
+    access_token = security.create_access_token({'sub': str(user.id)})
     
     return TokenResponse(
         success=True,
         message='You have successfully registered',
-        access_token=token,
+        access_token=access_token,
         token_type='bearer',
     )
+
 
 async def login_user(user_data: UserLogin, session: AsyncSession):
     stmt = select(Users).where(Users.email == user_data.email)

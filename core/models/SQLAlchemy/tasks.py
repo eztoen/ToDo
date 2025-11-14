@@ -1,5 +1,7 @@
 from sqlalchemy import (
-    Column, 
+    Integer,
+    Column,
+    ForeignKey, 
     String, 
     Date, 
     Enum as SQLEnum
@@ -19,3 +21,5 @@ class Tasks(Base):
     title = Column(String, nullable=False)
     date = Column(Date, nullable=False)
     status = Column(SQLEnum(TaskStatus), default=TaskStatus.CURRENT)
+    
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
