@@ -14,7 +14,7 @@ async def get_tasks(user_id: int, session: AsyncSession) -> list[Tasks]:
     stmt = select(Tasks).order_by(Tasks.date).where(Tasks.user_id == user_id)
     result: Result = await session.execute(stmt)
     tasks = result.scalars().all()
-    
+
     if not tasks:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
