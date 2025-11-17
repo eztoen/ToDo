@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException, status
+from redis import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.engine import Result
@@ -27,17 +28,16 @@ async def register_user(new_user: UserRegister, session: AsyncSession):
     await session.commit()
     await session.refresh(user)
     
-    access_token = security.create_access_token({'sub': str(user.id)})
-    
     return TokenResponse(
         success=True,
         message='You have successfully registered',
-        access_token=access_token,
-        token_type='bearer',
+        access_token=None,
+        refresh_token=None,
+        token_type=None,
     )
 
 
-async def login_user(user_data: UserLogin, session: AsyncSession):
+async def login_user(user_data: UserLogin, session: AsyncSession, redis: Redis):
     stmt = select(Users).where(Users.email == user_data.email)
     result: Result = await session.execute(stmt)
     user = result.scalar_one_or_none()
@@ -48,12 +48,20 @@ async def login_user(user_data: UserLogin, session: AsyncSession):
             detail='Invalid credentials. Please try again'
         )
         
-    token = security.create_access_token({'sub': str(user.id)})
+    access_token = security.create_access_token({'sub': str(user.id)})
+    refresh_token = security.create_access_token({'sub': str(user.id)})
+    
+    await redis.set(
+        f'refresh:{user.id}',
+        refresh_token,
+        ex=security.REFRESH_TOKEN_EXPIRE_DAYS * 86400
+    )
     
     return TokenResponse(
         success=True,
         message='You have successfully logged into your account',
-        access_token=token,
+        access_token=access_token,
+        refresh_token=refresh_token,
         token_type='bearer',
     )
     

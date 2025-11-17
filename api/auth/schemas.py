@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
 import re
 
@@ -34,5 +35,6 @@ class UserRead(BaseModel):
 class TokenResponse(BaseModel):
     success: bool
     message: str
-    access_token: str
-    token_type: str
+    access_token: Optional[str]
+    refresh_token: Optional[str]
+    token_type: Optional[str]
