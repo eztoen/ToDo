@@ -28,7 +28,8 @@ oauth2_scheme = JWTBearer()
 class Security(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str = 'HS256'
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    REFRESH_TOKEN_EXPIRE_DAYS: int
     
     def get_password_hash(self, password: str) -> str:
         return pwd_context.hash(password)
@@ -37,6 +38,16 @@ class Security(BaseSettings):
         return pwd_context.verify(plain_password, hashed_password)
 
     def create_access_token(self, data: dict, expire_delta: Optional[timedelta] = None):
+        to_encode = data.copy()
+        expire = datetime.now(timezone.utc) + (expire_delta or timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES))
+        to_encode.update({'exp': expire})
+        return jwt.encode(
+            to_encode, 
+            key=self.SECRET_KEY, 
+            algorithm=self.ALGORITHM
+        )
+        
+    def create_refresh_token(self, data: dict, expire_delta: Optional[timedelta] = None):
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + (expire_delta or timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES))
         to_encode.update({'exp': expire})

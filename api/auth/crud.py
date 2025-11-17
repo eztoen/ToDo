@@ -56,3 +56,4 @@ async def login_user(user_data: UserLogin, session: AsyncSession):
         access_token=token,
         token_type='bearer',
     )
+    
