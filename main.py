@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from core.models import Base, db_helper, redis_helper
-from tasks.views import router as task_router
-from auth.views import router as auth_router
+from api.tasks.views import router as task_router
+from api.auth.views import router as auth_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
