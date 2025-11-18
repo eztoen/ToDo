@@ -36,7 +36,6 @@ async def register_user(new_user: UserRegister, session: AsyncSession):
         token_type=None,
     )
 
-
 async def login_user(user_data: UserLogin, session: AsyncSession, redis: Redis):
     stmt = select(Users).where(Users.email == user_data.email)
     result: Result = await session.execute(stmt)
@@ -65,3 +64,14 @@ async def login_user(user_data: UserLogin, session: AsyncSession, redis: Redis):
         token_type='bearer',
     )
     
+async def logout_user(user_id: int, redis: Redis, session: AsyncSession):
+    key = f'refresh:{user_id}'
+    exists = await redis.exists(key)
+    
+    if exists:
+        await redis.delete(key)
+        
+    return {
+        'success': True,
+        'message': 'You have successfully logged out'
+    }
