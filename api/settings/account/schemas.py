@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-class ChangeName(BaseModel):
+class ChangeUsername(BaseModel):
     username: str = Field(..., min_length=5, max_length=35, pattern=r'^[a-zA-Z0-9_]+$')
 
 class ChangeEmail(BaseModel):
@@ -29,3 +29,7 @@ class ChangePassword(BaseModel):
     
 class DeleteAccount(BaseModel):
     confirmation_message: Literal['DELETE MY ACCOUNT']
+    
+class SettingsResponse(BaseModel):
+    success: bool
+    message: str
