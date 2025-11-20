@@ -10,7 +10,8 @@ from .schemas import ChangeUsername, SettingsResponse
 
 
 async def change_username(user_id: int, session: AsyncSession, new_username: ChangeUsername):
-    select_stmt = select(Users).where(Users.username == new_username)
+    print(new_username)
+    select_stmt = select(Users).where(Users.username == new_username.username)
     result: Result = await session.execute(select_stmt)
     
     if result.scalars().first():

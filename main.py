@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from core.models import Base, db_helper, redis_helper
 from api.tasks.views import router as task_router
 from api.auth.views import router as auth_router
+from api.settings.account.views import router as account_settings_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,6 +23,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(task_router)
 app.include_router(auth_router)
+app.include_router(account_settings_router, prefix='/settings')
 
 if __name__ == '__main__':
     uvicorn.run('main:app', reload=True)

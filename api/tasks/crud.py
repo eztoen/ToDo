@@ -62,7 +62,8 @@ async def create_task(user_id, session: AsyncSession, new_task: TaskCreate):
     
     return task
 
-async def update_task_status(session: AsyncSession, user_id: int, task_id: int, new_status: TaskStatus):
+async def update_task_status(session: AsyncSession, user_id: int, task_id: int, new_status: str):
+    print(new_status)
     select_stmt = select(Tasks).where(Tasks.user_id == user_id, Tasks.id == task_id)
     result: Result = await session.execute(select_stmt)
     task = result.scalars().first()
