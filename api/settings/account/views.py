@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud
-from .schemas import ChangeUsername, SettingsResponse
+from .schemas import ChangeUsername, SettingsResponse, ChangeEmail
 
 from core.models import get_db, rate_limiter
 from core.security import security
@@ -21,4 +21,18 @@ async def change_username(
         user_id=user_id,
         session=session,
         new_username=new_username
+    ) 
+
+@router.patch('/change-email', response_model=SettingsResponse)
+@rate_limiter(limit=1, period=86400)
+async def change_email(
+    request: Request,
+    new_email: ChangeEmail, 
+    user_id: int = Depends(security.get_user_id), 
+    session: AsyncSession = Depends(get_db)
+):
+    return await crud.change_email(
+        user_id=user_id,
+        session=session,
+        new_email=new_email
     )

@@ -3,6 +3,20 @@ import time
 from fastapi import Request, HTTPException, status
 from functools import wraps
 
+from fastapi.responses import JSONResponse
+
+async def reset_rate_limit(request: Request, identifier: str = None):
+    redis = request.app.state.redis
+    
+    if not identifier:
+        identifier = api_key_identifier(request)
+    
+    key_data = f"{identifier}:{request.method}:{request.url.path}"
+    key_hash = hashlib.md5(key_data.encode()).hexdigest()
+    key = f"rate_limit:{key_hash}"
+    
+    await redis.delete(key)
+
 def api_key_identifier(request: Request) -> str:
     api_key = (
         request.headers.get("X-API-Key") or
@@ -66,8 +80,12 @@ def rate_limiter(limit: int, period: int, identifier_fn=api_key_identifier):
                 
                 return await func(request, *args, **kwargs)
                 
-            except HTTPException:
-                raise
+            except HTTPException as e:
+                if (e.status_code == 400 and 
+                    "email already taken" in str(e.detail).lower()):
+                    await reset_rate_limit(request, identifier)
+                raise e
+            
             except Exception as e:
                 return await func(request, *args, **kwargs)
                 
