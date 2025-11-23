@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, status
 from redis import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.engine import Result
 
 from core.security import security, oauth2_scheme
@@ -25,8 +26,16 @@ async def register_user(new_user: UserRegister, session: AsyncSession):
         hashed_password = security.get_password_hash(new_user.password)
     )
     session.add(user)
-    await session.commit()
-    await session.refresh(user)
+    
+    try:
+        await session.commit()
+        await session.refresh(user)
+        
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='The username already exists'
+        )
     
     return TokenResponse(
         success=True,

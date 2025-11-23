@@ -7,6 +7,10 @@ class UserRegister(BaseModel):
     email: EmailStr = Field(..., min_length=5, max_length=256)
     password: str = Field(..., min_length=8, max_length=128)
 
+    @field_validator("username")
+    def lower_name(cls, value: str):
+        return value.lower()
+    
     @field_validator("password")
     def validate_password(cls, value):
         if not re.search(r"[A-Z]", value):
