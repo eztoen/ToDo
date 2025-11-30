@@ -58,7 +58,7 @@ async def create_task(user_id, session: AsyncSession, new_task: TaskCreate):
     await session.commit()
     await session.refresh(task)
     
-    clear_task_cache(new_task.date)
+    await clear_task_cache(new_task.date)
     
     return task
 

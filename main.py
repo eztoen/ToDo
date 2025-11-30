@@ -12,12 +12,12 @@ async def lifespan(app: FastAPI):
     async with db_helper.async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     
-    app.state.redis = await redis_helper.get_client()
+        app.state.redis = await redis_helper.get_client()
     
-    yield
+        yield
     
-    await redis_helper.close()
-    await db_helper.async_engine.dispose()
+        await redis_helper.close()
+        await conn.close()
         
 app = FastAPI(lifespan=lifespan)
 

@@ -3,7 +3,6 @@ import time
 from fastapi import Request, HTTPException, status
 from functools import wraps
 
-from fastapi.responses import JSONResponse
 
 async def reset_rate_limit(request: Request, identifier: str = None):
     redis = request.app.state.redis
