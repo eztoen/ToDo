@@ -1,10 +1,11 @@
+from redis import Redis
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import crud
-from .schemas import ChangePassword, ChangeUsername, SettingsResponse, ChangeEmail
+from .schemas import ChangePassword, ChangeUsername, SettingsResponse, ChangeEmail, DeleteAccount
 
-from core.models import get_db, rate_limiter
+from core.models import get_db, rate_limiter, redis_helper
 from core.security import security
 
 router = APIRouter(prefix='/account', tags=['settings'])
@@ -49,4 +50,18 @@ async def change_password(
         user_id=user_id,
         session=session,
         password=password
+    )
+    
+@router.delete('/delete-account', response_model=SettingsResponse)
+async def delete_account(
+    delete_user: DeleteAccount,
+    redis: Redis = Depends(redis_helper.get_client),
+    user_id: int = Depends(security.get_user_id),
+    session: AsyncSession = Depends(get_db)
+):
+    return await crud.delete_account(
+        redis=redis,
+        user_id=user_id,
+        session=session,
+        delete_user=delete_user
     )

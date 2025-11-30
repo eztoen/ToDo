@@ -1,12 +1,11 @@
-from fastapi import Depends, HTTPException, status
-from redis import Redis
-from sqlalchemy import select, update
+from fastapi import HTTPException, status
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.engine import Result
 
-from core.security import security, oauth2_scheme
+from core.security import security
 from core.models import Users
-from .schemas import ChangePassword, ChangeUsername, ChangeEmail, SettingsResponse
+from .schemas import ChangePassword, ChangeUsername, ChangeEmail, SettingsResponse, DeleteAccount
 
 
 async def change_username(user_id: int, session: AsyncSession, new_username: ChangeUsername):
@@ -80,4 +79,30 @@ async def change_password(user_id: int, session: AsyncSession, password = Change
     return SettingsResponse(
         success=True,
         message='You have successfully changed your password'
+    )
+    
+async def delete_account(redis, user_id: int, session: AsyncSession, delete_user: DeleteAccount):
+    if not delete_user.confirmation_message == 'DELETE MY ACCOUNT':
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            message='Invalid confirmation message'
+        )
+        
+    delete_stmt = (
+        delete(Users)
+        .where(Users.id == user_id)
+    )
+    
+    key = f'refresh:{user_id}'
+    exists = await redis.exists(key)
+    
+    if exists:
+        await redis.delete(key)
+        
+    await session.execute(delete_stmt)
+    await session.commit()
+    
+    return SettingsResponse(
+        success=True,
+        message='You have delete your account'
     )
